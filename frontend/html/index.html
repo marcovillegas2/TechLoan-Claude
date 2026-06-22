@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechLoan – Registrar Equipo</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner">
+      <span class="header__logo">TechLoan</span>
+      <span class="header__subtitle">Sistema de Préstamo de Equipos</span>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="card">
+      <h1 class="card__title">Registrar equipo</h1>
+      <p class="card__desc">Complete los datos del equipo tecnológico para ingresarlo al inventario.</p>
+
+      <form id="equipment-form" novalidate>
+
+        <div class="field">
+          <label class="field__label" for="name">Nombre del equipo <span class="required">*</span></label>
+          <input class="field__input" type="text" id="name" name="name"
+                 placeholder="Ej. Laptop HP ProBook" required maxlength="100" />
+          <span class="field__error" id="name-error"></span>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label" for="brand">Marca <span class="required">*</span></label>
+            <input class="field__input" type="text" id="brand" name="brand"
+                   placeholder="Ej. HP" required maxlength="100" />
+            <span class="field__error" id="brand-error"></span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="model">Modelo <span class="required">*</span></label>
+            <input class="field__input" type="text" id="model" name="model"
+                   placeholder="Ej. ProBook 450 G9" required maxlength="100" />
+            <span class="field__error" id="model-error"></span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label" for="serial_number">Número de serie <span class="required">*</span></label>
+            <input class="field__input" type="text" id="serial_number" name="serial_number"
+                   placeholder="Ej. SN-2024-00123" required maxlength="100" />
+            <span class="field__error" id="serial-error"></span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="category">Categoría <span class="required">*</span></label>
+            <select class="field__input field__select" id="category" name="category" required>
+              <option value="">Seleccionar…</option>
+              <option value="laptop">Laptop</option>
+              <option value="desktop">Desktop</option>
+              <option value="tablet">Tablet</option>
+              <option value="proyector">Proyector</option>
+              <option value="camara">Cámara</option>
+              <option value="otro">Otro</option>
+            </select>
+            <span class="field__error" id="category-error"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="description">Descripción</label>
+          <textarea class="field__input field__textarea" id="description" name="description"
+                    placeholder="Observaciones o características adicionales…" maxlength="500" rows="3"></textarea>
+        </div>
+
+        <div id="form-feedback" class="feedback" role="alert" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button type="reset" class="btn btn--secondary">Limpiar</button>
+          <button type="submit" class="btn btn--primary" id="submit-btn">
+            <span class="btn__text">Registrar equipo</span>
+            <span class="btn__spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+
+      </form>
+    </section>
+  </main>
+
+  <script src="../js/equipment.js"></script>
+</body>
+</html>
