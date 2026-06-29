@@ -1,125 +1,179 @@
-const API_URL = "/api/v1/equipment/";
+/* ── TechLoan — Gestión de Equipos ───────────────────────────────────────── */
 
-const form       = document.getElementById("equipment-form");
-const feedback   = document.getElementById("form-feedback");
-const submitBtn  = document.getElementById("submit-btn");
+const API = 'http://localhost:8000';
+let editingId = null;
+let deletingId = null;
 
-// ── Client-side validation ─────────────────────────────────────────────────
+/* ── Utility ─────────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
 
-const RULES = {
-  name:          { required: true, min: 2, label: "Nombre" },
-  brand:         { required: true, min: 2, label: "Marca" },
-  model:         { required: true, min: 1, label: "Modelo" },
-  serial_number: { required: true, min: 3, noSpaces: true, label: "Número de serie" },
-  category:      { required: true, label: "Categoría" },
+function toast(msg, type = 'success') {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = `toast toast-${type}`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = 'toast hidden'; }, 3500);
+}
+
+function statusBadge(status) {
+  const cls = status === 'DISPONIBLE' ? 'badge-disponible' : 'badge-prestado';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+/* ── Fetch helpers ───────────────────────────────────────────────────────── */
+async function apiFetch(path, opts = {}) {
+  const resp = await fetch(`${API}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ detail: 'Error del servidor' }));
+    throw new Error(err.detail || `Error ${resp.status}`);
+  }
+  if (resp.status === 204) return null;
+  return resp.json();
+}
+
+/* ── Load equipment list ─────────────────────────────────────────────────── */
+async function loadEquipment() {
+  try {
+    const data = await apiFetch('/equipment/');
+    renderTable(data);
+  } catch (e) {
+    renderTable([]);
+    toast('No se pudo cargar la lista de equipos', 'error');
+  }
+}
+
+function renderTable(list) {
+  const tbody = $('eqBody');
+  $('eqCount').textContent = `${list.length} equipo${list.length !== 1 ? 's' : ''}`;
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-cell">No hay equipos registrados.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(eq => `
+    <tr data-id="${eq.id}">
+      <td><strong>${eq.code}</strong></td>
+      <td>${eq.name}</td>
+      <td>${eq.category}</td>
+      <td>${statusBadge(eq.status)}</td>
+      <td class="actions-cell">
+        <button class="btn-icon btn-edit" onclick="startEdit(${eq.id})" title="Editar">✏️</button>
+        <button class="btn-icon btn-del"  onclick="askDelete(${eq.id})" title="Eliminar">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ── Form helpers ────────────────────────────────────────────────────────── */
+function clearErrors() {
+  ['errCode','errName','errCategory'].forEach(id => { $(id).textContent = ''; });
+}
+
+function validateForm() {
+  clearErrors();
+  let ok = true;
+  if (!$('fCode').value.trim())     { $('errCode').textContent = 'El código es obligatorio.'; ok = false; }
+  if (!$('fName').value.trim())     { $('errName').textContent = 'El nombre es obligatorio.'; ok = false; }
+  if (!$('fCategory').value.trim()) { $('errCategory').textContent = 'La categoría es obligatoria.'; ok = false; }
+  return ok;
+}
+
+function getFormData() {
+  return {
+    code:        $('fCode').value.trim(),
+    name:        $('fName').value.trim(),
+    category:    $('fCategory').value.trim(),
+    description: $('fDesc').value.trim() || null,
+    status:      $('fStatus').value,
+  };
+}
+
+function resetForm() {
+  $('equipmentForm').reset();
+  $('equipmentId').value = '';
+  editingId = null;
+  $('formTitle').textContent = 'Registrar Equipo';
+  $('submitBtn').textContent = 'Registrar';
+  clearErrors();
+}
+
+/* ── Edit ─────────────────────────────────────────────────────────────────── */
+async function startEdit(id) {
+  try {
+    const eq = await apiFetch(`/equipment/${id}`);
+    editingId = id;
+    $('equipmentId').value = id;
+    $('fCode').value     = eq.code;
+    $('fName').value     = eq.name;
+    $('fCategory').value = eq.category;
+    $('fDesc').value     = eq.description || '';
+    $('fStatus').value   = eq.status;
+    $('formTitle').textContent = 'Actualizar Equipo';
+    $('submitBtn').textContent = 'Actualizar';
+    clearErrors();
+    $('fCode').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    toast('No se pudo cargar el equipo', 'error');
+  }
+}
+
+/* ── Delete ──────────────────────────────────────────────────────────────── */
+function askDelete(id) {
+  deletingId = id;
+  $('overlay').classList.remove('hidden');
+}
+
+$('btnCancelDel').onclick = () => {
+  $('overlay').classList.add('hidden');
+  deletingId = null;
 };
 
-function validateField(name, value) {
-  const rule = RULES[name];
-  if (!rule) return null;
-  if (rule.required && !value.trim()) return `${rule.label} es obligatorio.`;
-  if (rule.min && value.trim().length < rule.min)
-    return `${rule.label} debe tener al menos ${rule.min} caracteres.`;
-  if (rule.noSpaces && value.includes(" "))
-    return `${rule.label} no puede contener espacios.`;
-  return null;
-}
-
-function showFieldError(name, message) {
-  const input = form.elements[name];
-  const error = document.getElementById(`${name.replace("_number", "")}-error`) ||
-                document.getElementById(`${name}-error`);
-  if (!input || !error) return;
-  if (message) {
-    input.classList.add("is-invalid");
-    error.textContent = message;
-  } else {
-    input.classList.remove("is-invalid");
-    error.textContent = "";
+$('btnConfirmDel').onclick = async () => {
+  $('overlay').classList.add('hidden');
+  try {
+    await apiFetch(`/equipment/${deletingId}`, { method: 'DELETE' });
+    toast('Equipo eliminado correctamente');
+    loadEquipment();
+  } catch (e) {
+    toast(e.message, 'error');
   }
-}
+  deletingId = null;
+};
 
-function validateAll() {
-  let valid = true;
-  for (const [name, rule] of Object.entries(RULES)) {
-    const el = form.elements[name];
-    if (!el) continue;
-    const msg = validateField(name, el.value);
-    const errorId = name === "serial_number" ? "serial-error" : `${name}-error`;
-    const errorEl = document.getElementById(errorId);
-    if (errorEl) errorEl.textContent = msg || "";
-    if (msg) { el.classList.add("is-invalid"); valid = false; }
-    else el.classList.remove("is-invalid");
-  }
-  return valid;
-}
-
-// Inline feedback as user types
-Object.keys(RULES).forEach(name => {
-  const el = form.elements[name];
-  if (!el) return;
-  el.addEventListener("input", () => {
-    const msg = validateField(name, el.value);
-    showFieldError(name, msg);
-  });
-});
-
-// ── Form submit ────────────────────────────────────────────────────────────
-
-form.addEventListener("submit", async (e) => {
+/* ── Form submit ─────────────────────────────────────────────────────────── */
+$('equipmentForm').onsubmit = async e => {
   e.preventDefault();
-  hideFeedback();
-  if (!validateAll()) return;
+  if (!validateForm()) return;
 
-  setLoading(true);
-
-  const body = {
-    name:          form.elements["name"].value.trim(),
-    brand:         form.elements["brand"].value.trim(),
-    model:         form.elements["model"].value.trim(),
-    serial_number: form.elements["serial_number"].value.trim(),
-    category:      form.elements["category"].value,
-    description:   form.elements["description"].value.trim() || null,
-  };
+  const data = getFormData();
+  const btn = $('submitBtn');
+  btn.disabled = true;
+  btn.textContent = editingId ? 'Actualizando…' : 'Registrando…';
 
   try {
-    const res  = await fetch(API_URL, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(body),
-    });
-    const data = await res.json();
-
-    if (res.status === 201) {
-      showFeedback("success",
-        `Equipo <strong>${data.name}</strong> registrado exitosamente (ID: ${data.id}).`);
-      form.reset();
-      form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+    if (editingId) {
+      await apiFetch(`/equipment/${editingId}`, { method: 'PUT', body: JSON.stringify(data) });
+      toast('Equipo actualizado correctamente');
     } else {
-      const msg = data.detail || "Error al registrar el equipo.";
-      showFeedback("error", msg);
+      await apiFetch('/equipment/', { method: 'POST', body: JSON.stringify(data) });
+      toast('Equipo registrado correctamente');
     }
-  } catch {
-    showFeedback("error", "No se pudo conectar con el servidor. Intente nuevamente.");
+    resetForm();
+    loadEquipment();
+  } catch (e) {
+    toast(e.message, 'error');
   } finally {
-    setLoading(false);
+    btn.disabled = false;
+    btn.textContent = editingId ? 'Actualizar' : 'Registrar';
   }
-});
+};
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+$('cancelBtn').onclick = resetForm;
 
-function setLoading(on) {
-  submitBtn.disabled = on;
-  submitBtn.classList.toggle("is-loading", on);
-}
-
-function showFeedback(type, html) {
-  feedback.className = `feedback is-${type}`;
-  feedback.innerHTML = html;
-  feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-function hideFeedback() {
-  feedback.className = "feedback";
-  feedback.innerHTML = "";
-}
+/* ── Init ────────────────────────────────────────────────────────────────── */
+loadEquipment();

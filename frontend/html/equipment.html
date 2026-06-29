@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechLoan — Equipos</title>
+  <link rel="stylesheet" href="../css/equipment.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>TechLoan</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="equipment.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Equipos
+      </a>
+      <a href="loan.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Préstamos
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="layout-main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Gestión de Equipos</h1>
+        <p class="page-subtitle">Inventario tecnológico del sistema</p>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="toast" class="toast hidden"></div>
+
+      <div class="two-col">
+
+        <!-- FORM -->
+        <section class="card">
+          <h2 class="card-title" id="formTitle">Registrar Equipo</h2>
+          <form id="equipmentForm" novalidate>
+            <input type="hidden" id="equipmentId">
+
+            <div class="field">
+              <label for="fCode">Código <span class="req">*</span></label>
+              <input type="text" id="fCode" placeholder="EQ-001">
+              <p class="ferr" id="errCode"></p>
+            </div>
+
+            <div class="field">
+              <label for="fName">Nombre <span class="req">*</span></label>
+              <input type="text" id="fName" placeholder="Laptop HP ProBook">
+              <p class="ferr" id="errName"></p>
+            </div>
+
+            <div class="field">
+              <label for="fCategory">Categoría <span class="req">*</span></label>
+              <input type="text" id="fCategory" list="catList" placeholder="Laptop">
+              <datalist id="catList">
+                <option value="Laptop"><option value="Tablet"><option value="Proyector">
+                <option value="Monitor"><option value="Impresora"><option value="Cámara">
+                <option value="Servidor"><option value="Switch"><option value="Router">
+              </datalist>
+              <p class="ferr" id="errCategory"></p>
+            </div>
+
+            <div class="field">
+              <label for="fDesc">Descripción</label>
+              <textarea id="fDesc" rows="3" placeholder="Descripción opcional…"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="fStatus">Estado <span class="req">*</span></label>
+              <select id="fStatus">
+                <option value="DISPONIBLE">DISPONIBLE</option>
+                <option value="PRESTADO">PRESTADO</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">Registrar</button>
+              <button type="button" class="btn btn-ghost" id="cancelBtn">Cancelar</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- TABLE -->
+        <section class="card">
+          <div class="card-header-row">
+            <h2 class="card-title">Equipos Registrados</h2>
+            <span class="badge-count" id="eqCount">—</span>
+          </div>
+          <div class="tbl-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th><th>Nombre</th><th>Categoría</th><th>Estado</th><th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="eqBody">
+                <tr><td colspan="5" class="empty-cell">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="overlay hidden" id="overlay">
+    <div class="modal">
+      <h3 class="modal-title">Confirmar eliminación</h3>
+      <p class="modal-msg">¿Eliminar este equipo permanentemente? Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="btnConfirmDel">Sí, eliminar</button>
+        <button class="btn btn-ghost" id="btnCancelDel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/equipment.js"></script>
+</body>
+</html>

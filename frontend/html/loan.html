@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechLoan — Préstamos</title>
+  <link rel="stylesheet" href="../css/loan.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>TechLoan</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="equipment.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Equipos
+      </a>
+      <a href="loan.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Préstamos
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="layout-main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Gestión de Préstamos</h1>
+        <p class="page-subtitle">Registro y devolución de equipos</p>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="toast" class="toast hidden"></div>
+
+      <div class="two-col">
+
+        <!-- FORM -->
+        <section class="card">
+          <h2 class="card-title">Registrar Préstamo</h2>
+
+          <form id="loanForm" novalidate>
+
+            <!-- Borrower section -->
+            <div class="form-section-label">
+              <span class="section-badge">1</span>
+              Datos del Solicitante
+            </div>
+
+            <div class="field">
+              <label for="bDni">DNI <span class="req">*</span></label>
+              <div class="input-group">
+                <input type="text" id="bDni" placeholder="12345678" maxlength="15">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnLookup">Buscar</button>
+              </div>
+              <p class="ferr" id="errDni"></p>
+              <p class="lookup-hint" id="lookupHint"></p>
+            </div>
+
+            <div class="field">
+              <label for="bFullName">Nombres completos <span class="req">*</span></label>
+              <input type="text" id="bFullName" placeholder="Ana García López">
+              <p class="ferr" id="errFullName"></p>
+            </div>
+
+            <div class="two-field">
+              <div class="field">
+                <label for="bEmail">Correo electrónico <span class="req">*</span></label>
+                <input type="email" id="bEmail" placeholder="ana@empresa.com">
+                <p class="ferr" id="errEmail"></p>
+              </div>
+              <div class="field">
+                <label for="bPhone">Teléfono <span class="req">*</span></label>
+                <input type="text" id="bPhone" placeholder="555-1234">
+                <p class="ferr" id="errPhone"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="bDept">Área o dependencia <span class="req">*</span></label>
+              <input type="text" id="bDept" placeholder="Sistemas / Recursos Humanos…">
+              <p class="ferr" id="errDept"></p>
+            </div>
+
+            <!-- Loan section -->
+            <div class="form-section-label" style="margin-top:20px;">
+              <span class="section-badge">2</span>
+              Datos del Préstamo
+            </div>
+
+            <div class="field">
+              <label for="lEquip">Equipo disponible <span class="req">*</span></label>
+              <select id="lEquip">
+                <option value="">— Seleccionar equipo —</option>
+              </select>
+              <p class="ferr" id="errEquip"></p>
+            </div>
+
+            <div class="two-field">
+              <div class="field">
+                <label for="lLoanDate">Fecha de préstamo <span class="req">*</span></label>
+                <input type="date" id="lLoanDate">
+                <p class="ferr" id="errLoanDate"></p>
+              </div>
+              <div class="field">
+                <label for="lDueDate">Fecha límite <span class="req">*</span></label>
+                <input type="date" id="lDueDate">
+                <p class="ferr" id="errDueDate"></p>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitLoan">Registrar préstamo</button>
+              <button type="button" class="btn btn-ghost" id="btnClearLoan">Limpiar</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- TABLE -->
+        <section class="card">
+          <div class="card-header-row">
+            <h2 class="card-title">Préstamos Registrados</h2>
+            <span class="badge-count" id="loanCount">—</span>
+          </div>
+          <div class="tbl-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Equipo</th>
+                  <th>Solicitante</th>
+                  <th>DNI</th>
+                  <th>F. Préstamo</th>
+                  <th>F. Límite</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="loanBody">
+                <tr><td colspan="7" class="empty-cell">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Return confirm modal -->
+  <div class="overlay hidden" id="returnOverlay">
+    <div class="modal">
+      <h3 class="modal-title">Registrar devolución</h3>
+      <p class="modal-msg">¿Confirmar la devolución de este préstamo? El equipo volverá a estar disponible.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="btnConfirmReturn">Confirmar devolución</button>
+        <button class="btn btn-ghost" id="btnCancelReturn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/loan.js"></script>
+</body>
+</html>

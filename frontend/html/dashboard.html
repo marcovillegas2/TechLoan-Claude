@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechLoan — Dashboard</title>
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>TechLoan</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="equipment.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Equipos
+      </a>
+      <a href="loan.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Préstamos
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="layout-main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Dashboard Administrativo</h1>
+        <p class="page-subtitle">Estado general del sistema TechLoan</p>
+      </div>
+      <button class="btn btn-refresh" onclick="loadAll()" id="refreshBtn">↻ Actualizar</button>
+    </header>
+
+    <main class="content">
+
+      <!-- 1. Summary cards -->
+      <div class="cards-grid" id="cardsGrid">
+        <div class="stat-card stat-blue">
+          <p class="stat-label">Total Equipos</p>
+          <p class="stat-value" id="cTotal">—</p>
+          <p class="stat-desc">registrados en el sistema</p>
+        </div>
+        <div class="stat-card stat-green">
+          <p class="stat-label">Disponibles</p>
+          <p class="stat-value" id="cAvail">—</p>
+          <p class="stat-desc">listos para préstamo</p>
+        </div>
+        <div class="stat-card stat-amber">
+          <p class="stat-label">Prestados</p>
+          <p class="stat-value" id="cLoaned">—</p>
+          <p class="stat-desc">actualmente en uso</p>
+        </div>
+        <div class="stat-card stat-red">
+          <p class="stat-label">Préstamos Vencidos</p>
+          <p class="stat-value" id="cOverdue">—</p>
+          <p class="stat-desc">requieren seguimiento</p>
+        </div>
+      </div>
+
+      <!-- 2. Charts -->
+      <div class="charts-row">
+        <div class="card chart-card">
+          <h2 class="card-title">Equipos por Estado</h2>
+          <div class="chart-area">
+            <canvas id="chartEquip" width="260" height="220"></canvas>
+            <div class="chart-legend" id="legendEquip"></div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <h2 class="card-title">Préstamos por Estado</h2>
+          <div class="chart-area">
+            <canvas id="chartLoans" width="280" height="220"></canvas>
+            <div class="chart-legend" id="legendLoans"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Overdue users table -->
+      <div class="card">
+        <div class="card-header-row">
+          <h2 class="card-title">Usuarios con Devoluciones Vencidas</h2>
+          <span class="badge-count" id="overdueCount">—</span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nombre completo</th>
+                <th>DNI</th>
+                <th>Equipo</th>
+                <th>Fecha límite</th>
+                <th>Días vencidos</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="overdueBody">
+              <tr><td colspan="6" class="empty-cell">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

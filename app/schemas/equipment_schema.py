@@ -1,42 +1,39 @@
-from pydantic import BaseModel, Field
-from datetime import date
-from typing import Optional
+from datetime import datetime
 from enum import Enum
+from typing import Optional
 
-
-class EquipmentCategory(str, Enum):
-    laptop = "laptop"
-    desktop = "desktop"
-    tablet = "tablet"
-    proyector = "proyector"
-    camara = "camara"
-    otro = "otro"
+from pydantic import BaseModel, ConfigDict
 
 
 class EquipmentStatus(str, Enum):
-    disponible = "disponible"
-    prestado = "prestado"
-    mantenimiento = "en mantenimiento"
+    DISPONIBLE = "DISPONIBLE"
+    PRESTADO = "PRESTADO"
 
 
 class EquipmentCreate(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100, examples=["Laptop HP ProBook"])
-    brand: str = Field(..., min_length=2, max_length=100, examples=["HP"])
-    model: str = Field(..., min_length=1, max_length=100, examples=["ProBook 450 G9"])
-    serial_number: str = Field(..., min_length=3, max_length=100, examples=["SN-2024-00123"])
-    category: EquipmentCategory
-    description: Optional[str] = Field(None, max_length=500)
-
-
-class EquipmentResponse(BaseModel):
-    id: int
+    code: str
     name: str
-    brand: str
-    model: str
-    serial_number: str
     category: str
-    status: str
-    registration_date: date
-    description: Optional[str]
+    description: Optional[str] = None
+    status: EquipmentStatus
 
-    model_config = {"from_attributes": True}
+
+class EquipmentUpdate(BaseModel):
+    code: Optional[str] = None
+    name: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[EquipmentStatus] = None
+
+
+class EquipmentRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    code: str
+    name: str
+    category: str
+    description: Optional[str] = None
+    status: EquipmentStatus
+    created_at: datetime
+    updated_at: Optional[datetime] = None
